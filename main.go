@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-var crlf *bool = flag.Bool("crlf", false, `\n to \r\n`)
+var crlf *bool = flag.Bool("crlf", false, `\n to \r\n !`)
 var lf *bool = flag.Bool("lf", false, `\r\n to \n`)
 var recursive *bool = flag.Bool("r", false, "recurse subdirectories")
 var verbosity *int = flag.Int("v", 1, "verbosity\n\t0 = only errors\n\t1 = only changed files\n\t2 = report all files\n\t")
@@ -156,24 +156,7 @@ func processFile(dir, shortFilename string) {
 		diff := fi1.Size() - fi2.Size()
 
 		if diff != 0 {
-			tmp2, err := ioutil.TempFile(dir, shortFilename)
-			if err != nil {
-				log.Fatal(err)
-			}
-			tmp2.Close()
-			if err = os.Remove(tmp2.Name()); err != nil {
-				log.Fatal(err)
-			}
-
-			if err = os.Rename(fullFilename, tmp2.Name()); err != nil {
-				log.Fatal(err)
-			}
-
-			if err = os.Rename(tmp.Name(), fullFilename); err != nil {
-				log.Fatal(err)
-			}
-
-			if err = os.Remove(tmp2.Name()); err != nil {
+			if err := replaceFile(tmp.Name(), fullFilename); err != nil {
 				log.Fatal(err)
 			}
 
@@ -201,4 +184,32 @@ func abs(a int64) int64 {
 		return -a
 	}
 	return a
+}
+
+func replaceFile(src, dest string) error {
+	dir := filepath.Dir(dest)
+	shortFilename := dest[len(dir):]
+
+	tmp2, err := ioutil.TempFile(dir, shortFilename)
+	if err != nil {
+		return err
+	}
+	tmp2.Close()
+	if err = os.Remove(tmp2.Name()); err != nil {
+		return err
+	}
+
+	if err = os.Rename(dest, tmp2.Name()); err != nil {
+		return err
+	}
+
+	if err = os.Rename(src, dest); err != nil {
+		return err
+	}
+
+	if err = os.Remove(tmp2.Name()); err != nil {
+		return err
+	}
+
+	return nil
 }
