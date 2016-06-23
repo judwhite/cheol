@@ -109,7 +109,7 @@ func processFile(dir, shortFilename string) {
 
 	contentType := http.DetectContentType(buf[:n])
 
-	if strings.HasPrefix(contentType, "text/plain") {
+	if strings.HasPrefix(contentType, "text/") {
 		_, err := f.Seek(0, os.SEEK_SET)
 		if err != nil {
 			log.Fatal(err)
