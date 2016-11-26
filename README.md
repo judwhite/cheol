@@ -1,7 +1,7 @@
 # cheol
 Change line endings.
 
-`go get -u https://github.com/judwhite/cheol`
+`go get -u github.com/judwhite/cheol`
 
 Usage:
 ```
